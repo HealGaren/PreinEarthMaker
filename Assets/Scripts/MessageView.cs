@@ -90,8 +90,9 @@ public class MessageView : MonoBehaviour {
         {
             if (callback != null)
             {
-                callback();
+                var cb = callback;
                 callback = null;
+                cb();
             }
         }
         else
