@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class TitleUIManager : MonoBehaviour {
 
+    public Animator fadeOutBlackAnimator;
 	// Use this for initialization
 	void Start () {
+        fadeOutBlackAnimator.SetBool("isShow", false);
 		
 	}
 	
@@ -17,11 +20,13 @@ public class TitleUIManager : MonoBehaviour {
 
     public void OnClickStart()
     {
-        SceneManager.LoadScene("InGame");
+        fadeOutBlackAnimator.SetBool("isShow", true);
+        StartCoroutine(LoadGameDelay());
     }
 
-    public void OnClickContinue()
+    IEnumerator LoadGameDelay()
     {
+        yield return new WaitForSeconds(1);
         SceneManager.LoadScene("InGame");
     }
 }
