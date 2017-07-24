@@ -8,6 +8,8 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
 
+    public AudioClip bgm;
+
     public GameUIManager uiManager;
 
 
@@ -48,6 +50,7 @@ public class GameManager : MonoBehaviour
 
         StartCoroutine(SetupQuestDelay());
 
+        GetComponent<AudioSource>().PlayOneShot(bgm);
 
 
     }
