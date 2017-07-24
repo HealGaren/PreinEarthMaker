@@ -41,6 +41,7 @@ public class GameManager : MonoBehaviour
         fadeInOutAnimator.SetBool("isShow", false);
         uiManager.picture.SetDoneCallback(() =>
         {
+            topLayer.OnClick();
             fadeInOutAnimator.SetBool("isShow", true);
             StartCoroutine(DelayShowEnd());
         });
@@ -82,6 +83,7 @@ public class GameManager : MonoBehaviour
     public IEnumerator SetupQuestCoroutine()
     {
         var q = quest.quests[currentIndex];
+        npc.GetComponent<RawImage>().texture = quest.whos[q.who];
         npc.SetBool("isShow", true);
         yield return new WaitForSeconds(1);
         selectBox.setOnLeftClickOnce(() =>
