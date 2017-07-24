@@ -1,8 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
-public class GameManager : MonoBehaviour {
+public class GameManager : MonoBehaviour
+{
 
     public GameUIManager uiManager;
 
@@ -10,25 +14,139 @@ public class GameManager : MonoBehaviour {
     public MessageView messageView;
     public Animator fadeInOutAnimator;
 
+    public TopLayer topLayer;
 
-	// Use this for initialization
-	void Start () {
-        fadeInOutAnimator.SetBool("isShow", false);
+    public Quest quest;
 
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-        if(Input.GetKeyDown(KeyCode.K))
-        {
-            SetDebugNext();
+    public Animator npc;
 
-        }
-	}
-
-    public void SetDebugNext()
+    private static GameManager _instance;
+    public static GameManager instance
     {
-        messageView.ShowText(new string[] { "안녕하세요 가나다라마바사 어그래서\n안녕하세요안녕하세요", "바이바이" }, () => { uiManager.picture.Next(); SetDebugNext(); Debug.Log("z"); });
+        get
+        {
+            return _instance;
+        }
+    }
+
+    void Awake()
+    {
+        _instance = this;
+    }
+
+
+    // Use this for initialization
+    void Start()
+    {
+        fadeInOutAnimator.SetBool("isShow", false);
+        uiManager.picture.SetDoneCallback(() =>
+        {
+            fadeInOutAnimator.SetBool("isShow", true);
+            StartCoroutine(DelayShowEnd());
+        });
+
+        StartCoroutine(SetupQuestDelay());
+
+
+
+    }
+
+    IEnumerator DelayShowEnd()
+    {
+        yield return new WaitForSeconds(1);
+        SceneManager.LoadScene("NormalEnd");
+    }
+
+    IEnumerator DelayShowBadEnd()
+    {
+        yield return new WaitForSeconds(1);
+        SceneManager.LoadScene("BadEnd");
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
+
+    public int currentIndex = 0;
+
+    public SelectBox selectBox;
+
+    public void SetupQuest()
+    {
+        StartCoroutine(SetupQuestCoroutine());
+    }
+
+
+    public IEnumerator SetupQuestCoroutine()
+    {
+        var q = quest.quests[currentIndex];
+        npc.SetBool("isShow", true);
+        yield return new WaitForSeconds(1);
+        selectBox.setOnLeftClickOnce(() =>
+        {
+            selectBox.animator.SetBool("isShow", false);
+            messageView.ShowText(q.left.afterWords, () =>
+            {
+                npc.SetBool("isShow", false);
+                StartCoroutine(DelayAndShowWords(q.left.resultWords, q.left.result));
+            });
+        });
+        selectBox.setOnRightClickOnce(() =>
+        {
+            selectBox.animator.SetBool("isShow", false);
+            messageView.ShowText(q.right.afterWords, () =>
+            {
+                npc.SetBool("isShow", false);
+                StartCoroutine(DelayAndShowWords(q.right.resultWords, q.right.result));
+            });
+        });
+        selectBox.SetText(q.left.answer, q.right.answer);
+        messageView.ShowText(q.words, () => {
+            selectBox.animator.SetBool("isShow", true);
+        });
+    }
+
+    IEnumerator DelayAndShowWords(string[] words, Action action)
+    {
+        yield return new WaitForSeconds(1);
+        messageView.ShowText(words, ()=>
+        {
+            action();
+            StartCoroutine(SetupNextQuestDelay());
+        });
+    }
+
+    IEnumerator SetupNextQuestDelay()
+    {
+        yield return new WaitForSeconds(1);
+        uiManager.year += 10;
+        currentIndex++;
+
+
+        if (!CheckDie())
+        {
+            SetupQuest();
+            //else Debug.Log("end");
+        }
+    }
+
+    IEnumerator SetupQuestDelay() {
+        yield return new WaitForSeconds(1);
+        SetupQuest();
+    }
+
+
+
+    public bool CheckDie()
+    {
+        if (topLayer.energy.people <= 0)
+        {
+            fadeInOutAnimator.SetBool("isShow", true);
+            StartCoroutine(DelayShowBadEnd());
+        }
+        
+        return false;
     }
 }

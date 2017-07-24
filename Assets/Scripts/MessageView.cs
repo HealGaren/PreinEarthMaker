@@ -49,6 +49,8 @@ public class MessageView : MonoBehaviour {
 	}
     public void ShowText(IEnumerable<string> str, Action callback = null)
     {
+
+
         if (callback != null) this.callback = callback;
         targetStr.Clear();
         targetStr.AddRange(str);
